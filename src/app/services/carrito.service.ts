@@ -1,7 +1,7 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
 import { ItemCarrito, Producto } from '../models/producto';
 
-const CLAVE_STORAGE = 'mojojitos-carrito-v2';
+const CLAVE_STORAGE = 'mojojitos-carrito-v3';
 
 @Injectable({ providedIn: 'root' })
 export class CarritoService {

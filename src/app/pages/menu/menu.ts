@@ -30,6 +30,15 @@ export class Menu {
     this.mostrarAviso(`${promo.nombre} agregado al carrito`);
   }
 
+  /** Los packs clásicos se agregan directo; los de sabores abren el selector */
+  elegirPromo(promo: Producto): void {
+    if (promo.variante === 'clasico') {
+      this.agregarPromo(promo, [`${promo.litros} Clásico`]);
+    } else {
+      this.promoAbierta.set(promo);
+    }
+  }
+
   private mostrarAviso(texto: string): void {
     this.aviso.set(texto);
     clearTimeout(this.temporizador);

@@ -11,6 +11,8 @@ export interface Producto {
   /** Litros que incluye: 1 para sabores, 2 o 4 para promociones */
   litros: number;
   etiqueta?: string;
+  /** Solo promociones: 'clasico' = puro Clásico (sin elegir), 'sabores' = elegir entre los sabores frutales */
+  variante?: 'clasico' | 'sabores';
 }
 
 export interface ItemCarrito {

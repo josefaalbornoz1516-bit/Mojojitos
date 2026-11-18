@@ -78,7 +78,9 @@
 
           <div class="pie">
             <span class="precio">{{ promo.precio | clp }}</span>
-            <button class="btn btn-rosado" (click)="promoAbierta.set(promo)">Elegir sabores</button>
+            <button class="btn btn-rosado" (click)="elegirPromo(promo)">
+              {{ promo.variante === 'clasico' ? 'Agregar' : 'Elegir sabores' }}
+            </button>
           </div>
         </div>
       </article>
