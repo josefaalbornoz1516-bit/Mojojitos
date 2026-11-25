@@ -1,14 +1,19 @@
 # Imágenes de productos
 
-Pon aquí las fotos con estos nombres exactos (formato .webp, idealmente 800x600 px):
+Fotos en formato .webp de 800x600 px (4:3). Para cambiar una, reemplaza el archivo con el mismo nombre.
 
+Sabores:
 - mojojito-clasico.webp
-- mojojito-pink.webp
-- mojojito-passion.webp
-- mojojito-berry.webp
+- mojojito-pink.webp (frutilla)
+- mojojito-passion.webp (maracuyá)
+- mojojito-berry.webp (frambuesa)
 - mojojito-mango.webp
-- duo-mojojitos.webp
-- pack-la-junta.webp
+
+Promociones:
+- duo-clasico.webp
+- duo-sabores.webp
+- junta-clasica.webp
+- junta-sabores.webp
+- pack-familiar.webp
 
 Si una foto no existe, la página muestra automáticamente la ilustración del mojito.
-Si usas otro formato (.jpg, .png), cambia la ruta en src/app/data/productos.ts
