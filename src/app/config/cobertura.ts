@@ -3,8 +3,13 @@ import { Coordenadas } from '../models/producto';
 /**
  * MAPA DE COBERTURA DE MOJOJITOS
  *
- * Para corregir una coordenada: en Google Maps haz clic derecho sobre el punto
- * exacto y presiona los números que aparecen arriba (se copian como "lat, lng").
+ * Cada zona es uno o más polígonos trazados sobre las calles reales
+ * (Costanera Sur, Huelén, José Joaquín Pérez, Neptuno, Gral. Óscar Bonilla,
+ * Gladys Marín, Los Pajaritos, etc.). Cada vértice es [latitud, longitud].
+ *
+ * Para ajustar un borde: en Google Maps haz clic derecho sobre el punto exacto,
+ * copia los números ("lat, lng") y reemplaza o agrega un vértice.
+ * Las zonas no se superponen; si un punto quedara en dos, gana la primera de la lista.
  */
 
 /** Punto de salida: Heraldo Latorre 970–989, Pudahuel (Teniente Cobo / Serrano) */
@@ -22,119 +27,202 @@ export const COMUNAS: Comuna[] = [
   { nombre: 'Maipú', centro: { lat: -33.483, lng: -70.752 } },
 ];
 
-/**
- * Puntos de despacho. El cliente marca su ubicación y se cobra el precio
- * del punto más cercano, siempre que esté dentro de su radio (en metros).
- * Para cubrir un tramo completo de una calle se usan varios puntos seguidos.
- */
-export interface PuntoDespacho {
+/** [latitud, longitud] */
+export type Vertice = [number, number];
+
+export interface ZonaDespacho {
   zona: string;
   comuna: string;
-  ubicacion: Coordenadas;
-  radio: number;
   precio: number;
+  poligonos: Vertice[][];
 }
 
-export const PUNTOS_DESPACHO: PuntoDespacho[] = [
-  // 1. ENEA – Pudahuel (Ruta 68, Vespucio, Costanera Norte, Lo Boza, Aeropuerto Sur)
+export const ZONAS_DESPACHO: ZonaDespacho[] = [
+  {
+    zona: 'ENEA norte',
+    comuna: 'Pudahuel',
+    precio: 3000,
+    poligonos: [
+      [
+        [-33.4266, -70.76664], [-33.4266, -70.78512], [-33.42586, -70.78518], [-33.4229, -70.7843],
+        [-33.42105, -70.78123], [-33.42082, -70.77771], [-33.42216, -70.7742], [-33.42401, -70.77024],
+        [-33.42527, -70.76673], [-33.41549, -70.76738], [-33.41549, -70.76664],
+      ],
+    ],
+  },
   {
     zona: 'ENEA',
     comuna: 'Pudahuel',
-    ubicacion: { lat: -33.432, lng: -70.783 },
-    radio: 1800,
     precio: 1500,
+    poligonos: [
+      [
+        [-33.43697, -70.76453], [-33.43697, -70.77446], [-33.43549, -70.77464], [-33.43401, -70.77727],
+        [-33.4329, -70.78035], [-33.43142, -70.78342], [-33.42882, -70.78492], [-33.4266, -70.78512],
+        [-33.4266, -70.76453],
+      ],
+    ],
   },
   {
-    zona: 'ENEA',
+    zona: 'Pudahuel cercano',
     comuna: 'Pudahuel',
-    ubicacion: { lat: -33.42, lng: -70.779 },
-    radio: 1200,
     precio: 1500,
-  },
-
-  // Pudahuel cercano al punto de salida
-  { zona: 'Pudahuel cercano', comuna: 'Pudahuel', ubicacion: ORIGEN, radio: 1800, precio: 1500 },
-
-  // 2. Cerro Navia – Av. Costanera Sur, tramo completo Lanalhue → Huelén
-  {
-    zona: 'Cerro Navia (Costanera Sur)',
-    comuna: 'Cerro Navia',
-    ubicacion: { lat: -33.412, lng: -70.733 },
-    radio: 700,
-    precio: 2000,
-  }, // Lanalhue
-  {
-    zona: 'Cerro Navia (Costanera Sur)',
-    comuna: 'Cerro Navia',
-    ubicacion: { lat: -33.4135, lng: -70.7395 },
-    radio: 700,
-    precio: 2000,
+    poligonos: [
+      [
+        [-33.46068, -70.7329], [-33.46068, -70.76453], [-33.43253, -70.76453], [-33.43253, -70.7329],
+      ],
+    ],
   },
   {
-    zona: 'Cerro Navia (Costanera Sur)',
+    zona: 'Cerro Navia poniente',
     comuna: 'Cerro Navia',
-    ubicacion: { lat: -33.415, lng: -70.746 },
-    radio: 700,
     precio: 2000,
+    poligonos: [
+      [
+        [-33.43253, -70.76453], [-33.4266, -70.76453], [-33.4266, -70.76664], [-33.41549, -70.76664],
+        [-33.41549, -70.76738], [-33.4149, -70.76742], [-33.41469, -70.7647], [-33.41397, -70.76166],
+        [-33.41354, -70.75565], [-33.41343, -70.75223], [-33.43253, -70.75223],
+      ],
+    ],
   },
   {
-    zona: 'Cerro Navia (Costanera Sur / Huelén)',
+    zona: 'Cerro Navia oriente',
     comuna: 'Cerro Navia',
-    ubicacion: { lat: -33.4165, lng: -70.7525 },
-    radio: 700,
     precio: 2500,
-  }, // Huelén
-
-  // 3. Metro Pajaritos – Lo Prado (Gral. Óscar Bonilla, Santa Marta y alrededores)
-  {
-    zona: 'Metro Pajaritos',
-    comuna: 'Lo Prado',
-    ubicacion: { lat: -33.4574, lng: -70.716 },
-    radio: 1200,
-    precio: 2000,
+    poligonos: [
+      [
+        [-33.43253, -70.75223], [-33.41343, -70.75223], [-33.41312, -70.74271], [-33.4298, -70.73842],
+        [-33.42944, -70.73612], [-33.42958, -70.73391], [-33.42938, -70.7329], [-33.43253, -70.7329],
+      ],
+    ],
   },
-
-  // Maipú cercano (sector norte de Maipú)
+  {
+    zona: 'Lo Prado · Metro Pajaritos',
+    comuna: 'Lo Prado',
+    precio: 2000,
+    poligonos: [
+      [
+        [-33.42932, -70.73262], [-33.43024, -70.7215], [-33.43061, -70.72028], [-33.45564, -70.72178],
+        [-33.45565, -70.72206], [-33.4566, -70.71881], [-33.45748, -70.71371], [-33.45794, -70.71318],
+        [-33.45842, -70.71301], [-33.4592, -70.71255], [-33.45964, -70.71397], [-33.46029, -70.71522],
+        [-33.46102, -70.71735], [-33.46167, -70.71865], [-33.46188, -70.71974], [-33.46232, -70.71993],
+        [-33.4624, -70.7209], [-33.46286, -70.72134], [-33.4632, -70.72223], [-33.46331, -70.72296],
+        [-33.46375, -70.72333], [-33.46398, -70.72398], [-33.46495, -70.72512], [-33.46493, -70.72562],
+        [-33.46549, -70.72665], [-33.46551, -70.72721], [-33.46629, -70.7276], [-33.4664, -70.72837],
+        [-33.46687, -70.7287], [-33.46694, -70.72988], [-33.46766, -70.73014], [-33.4679, -70.73106],
+        [-33.46841, -70.73143], [-33.46926, -70.7329], [-33.42938, -70.7329],
+      ],
+    ],
+  },
+  {
+    zona: 'Pudahuel poniente',
+    comuna: 'Pudahuel',
+    precio: 2500,
+    poligonos: [
+      [
+        [-33.45623, -70.76453], [-33.45623, -70.77262], [-33.45327, -70.77262], [-33.45031, -70.77376],
+        [-33.44734, -70.7742], [-33.43919, -70.7742], [-33.43697, -70.77446], [-33.43697, -70.76453],
+      ],
+    ],
+  },
   {
     zona: 'Maipú cercano',
     comuna: 'Maipú',
-    ubicacion: { lat: -33.473, lng: -70.745 },
-    radio: 1300,
     precio: 2500,
+    poligonos: [
+      [
+        [-33.46926, -70.7329], [-33.47138, -70.73641], [-33.47405, -70.73873], [-33.47395, -70.73939],
+        [-33.47528, -70.74009], [-33.47571, -70.74072], [-33.47643, -70.74076], [-33.47703, -70.74167],
+        [-33.47737, -70.74156], [-33.47812, -70.74192], [-33.47845, -70.74238], [-33.47845, -70.76076],
+        [-33.47512, -70.76102], [-33.47142, -70.76365], [-33.47046, -70.76453], [-33.46068, -70.76453],
+        [-33.46068, -70.7329],
+      ],
+    ],
   },
-
-  // 4. Mall Arauco Maipú (Av. Américo Vespucio y alrededores)
   {
     zona: 'Mall Arauco Maipú',
     comuna: 'Maipú',
-    ubicacion: { lat: -33.483, lng: -70.752 },
-    radio: 1200,
     precio: 3000,
+    poligonos: [
+      [
+        [-33.47854, -70.7425], [-33.47919, -70.74288], [-33.48017, -70.74402], [-33.48277, -70.74588],
+        [-33.4846, -70.74681], [-33.48493, -70.74729], [-33.48546, -70.74767], [-33.48693, -70.74975],
+        [-33.48068, -70.76014], [-33.47845, -70.76076], [-33.47845, -70.74238], [-33.47812, -70.74192],
+      ],
+      [
+        [-33.46808, -70.76673], [-33.46364, -70.77024], [-33.45956, -70.77332], [-33.45771, -70.77437],
+        [-33.45623, -70.77262], [-33.45623, -70.76453], [-33.47046, -70.76453], [-33.47142, -70.76365],
+      ],
+    ],
+  },
+  {
+    zona: 'Cerro Navia norte',
+    comuna: 'Cerro Navia',
+    precio: 3500,
+    poligonos: [
+      [
+        [-33.41362, -70.73527], [-33.41446, -70.72743], [-33.41429, -70.72591], [-33.41373, -70.72445],
+        [-33.41508, -70.71587], [-33.41646, -70.71671], [-33.41991, -70.71749], [-33.43061, -70.72028],
+        [-33.43024, -70.7215], [-33.42932, -70.73262], [-33.42958, -70.73391], [-33.42944, -70.73612],
+        [-33.4298, -70.73842], [-33.41312, -70.74271],
+      ],
+    ],
+  },
+  {
+    zona: 'Lo Prado oriente',
+    comuna: 'Lo Prado',
+    precio: 3500,
+    poligonos: [
+      [
+        [-33.43258, -70.71305], [-33.43253, -70.70837], [-33.4329, -70.7083], [-33.45623, -70.7083],
+        [-33.45842, -70.71301], [-33.45794, -70.71318], [-33.45748, -70.71371], [-33.4566, -70.71881],
+        [-33.45565, -70.72206], [-33.45564, -70.72178], [-33.43061, -70.72028],
+      ],
+    ],
+  },
+  {
+    zona: 'Maipú sur',
+    comuna: 'Maipú',
+    precio: 3500,
+    poligonos: [
+      [
+        [-33.45919, -70.71137], [-33.4629, -70.71076], [-33.46734, -70.7105], [-33.47253, -70.71094],
+        [-33.47697, -70.71269], [-33.47993, -70.71533], [-33.48142, -70.71796], [-33.4829, -70.72412],
+        [-33.48364, -70.73114], [-33.48475, -70.73817], [-33.48586, -70.74432], [-33.48808, -70.74784],
+        [-33.49068, -70.7496], [-33.4929, -70.75179], [-33.49364, -70.75663], [-33.49364, -70.76365],
+        [-33.49327, -70.76805], [-33.48993, -70.7764], [-33.48549, -70.77552], [-33.4829, -70.76893],
+        [-33.48068, -70.76014], [-33.48693, -70.74975], [-33.48546, -70.74767], [-33.48493, -70.74729],
+        [-33.4846, -70.74681], [-33.48277, -70.74588], [-33.48017, -70.74402], [-33.47919, -70.74288],
+        [-33.47854, -70.7425], [-33.47812, -70.74192], [-33.47737, -70.74156], [-33.47703, -70.74167],
+        [-33.47643, -70.74076], [-33.47571, -70.74072], [-33.47528, -70.74009], [-33.47395, -70.73939],
+        [-33.47405, -70.73873], [-33.47138, -70.73641], [-33.46841, -70.73143], [-33.4679, -70.73106],
+        [-33.46766, -70.73014], [-33.46694, -70.72988], [-33.46687, -70.7287], [-33.4664, -70.72837],
+        [-33.46629, -70.7276], [-33.46551, -70.72721], [-33.46549, -70.72665], [-33.46493, -70.72562],
+        [-33.46495, -70.72512], [-33.46398, -70.72398], [-33.46375, -70.72333], [-33.46331, -70.72296],
+        [-33.4632, -70.72223], [-33.46286, -70.72134], [-33.4624, -70.7209], [-33.46232, -70.71993],
+        [-33.46188, -70.71974], [-33.46167, -70.71865], [-33.46102, -70.71735], [-33.46029, -70.71522],
+        [-33.45964, -70.71397], [-33.4592, -70.71255],
+      ],
+    ],
   },
 ];
 
-/** Distancia en metros entre dos coordenadas (fórmula de Haversine) */
-export function distanciaMetros(a: Coordenadas, b: Coordenadas): number {
-  const R = 6371000;
-  const rad = (g: number) => (g * Math.PI) / 180;
-  const dLat = rad(b.lat - a.lat);
-  const dLng = rad(b.lng - a.lng);
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
+/** true si el punto está dentro del polígono (algoritmo de ray casting) */
+export function puntoEnPoligono(punto: Coordenadas, poligono: Vertice[]): boolean {
+  let dentro = false;
+  for (let i = 0, j = poligono.length - 1; i < poligono.length; j = i++) {
+    const [latI, lngI] = poligono[i];
+    const [latJ, lngJ] = poligono[j];
+    const cruza =
+      latI > punto.lat !== latJ > punto.lat &&
+      punto.lng < ((lngJ - lngI) * (punto.lat - latI)) / (latJ - latI) + lngI;
+    if (cruza) dentro = !dentro;
+  }
+  return dentro;
 }
 
-/** Devuelve el punto de despacho que corresponde a una ubicación, o null si está fuera de cobertura */
-export function buscarPuntoDespacho(ubicacion: Coordenadas): PuntoDespacho | null {
-  let mejor: PuntoDespacho | null = null;
-  let menorDistancia = Infinity;
-
-  for (const punto of PUNTOS_DESPACHO) {
-    const distancia = distanciaMetros(ubicacion, punto.ubicacion);
-    if (distancia <= punto.radio && distancia < menorDistancia) {
-      mejor = punto;
-      menorDistancia = distancia;
-    }
-  }
-  return mejor;
+/** Devuelve la zona de despacho que corresponde a una ubicación, o null si está fuera de cobertura */
+export function buscarZonaDespacho(ubicacion: Coordenadas): ZonaDespacho | null {
+  return (
+    ZONAS_DESPACHO.find((zona) => zona.poligonos.some((p) => puntoEnPoligono(ubicacion, p))) ?? null
+  );
 }

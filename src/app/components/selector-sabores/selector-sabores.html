@@ -6,14 +6,26 @@
   </button>
 
   <h2>{{ promo().nombre }}</h2>
-  <p class="subtitulo">
-    Elige {{ promo().litros }} litros · <span class="precio">{{ promo().precio | clp }}</span>
-  </p>
+  @if (familiar()) {
+    <p class="subtitulo">
+      Elige de {{ minimo() }} a {{ maximo() }} litros. Mientras más llevas, más barato sale cada
+      litro, y el Clásico es el más conveniente.
+    </p>
+  } @else {
+    <p class="subtitulo">
+      Elige {{ promo().litros }} litros · <span class="precio">{{ promo().precio | clp }}</span>
+    </p>
+  }
 
   <div class="progreso">
-    <div class="barra" [style.width.%]="(elegidos() / promo().litros) * 100"></div>
+    <div class="barra" [style.width.%]="(elegidos() / maximo()) * 100"></div>
+    @if (familiar()) {
+      <div class="marca-minimo" [style.left.%]="(minimo() / maximo()) * 100"></div>
+    }
   </div>
-  <p class="contador">{{ elegidos() }} de {{ promo().litros }} elegidos</p>
+  <p class="contador">
+    {{ elegidos() }} de {{ familiar() ? minimo() + ' a ' + maximo() : maximo() }} litros
+  </p>
 
   <ul class="lista">
     @for (sabor of sabores; track sabor.id) {
@@ -34,7 +46,7 @@
             <app-icono nombre="menos" [tamano]="16" />
           </button>
           <span>{{ cantidad(sabor.id) }}</span>
-          <button (click)="cambiar(sabor.id, 1)" [disabled]="completo()" aria-label="Agregar">
+          <button (click)="cambiar(sabor.id, 1)" [disabled]="lleno()" aria-label="Agregar">
             <app-icono nombre="mas" [tamano]="16" />
           </button>
         </div>
@@ -42,15 +54,38 @@
     }
   </ul>
 
-  <button class="btn btn-lima agregar" [disabled]="!completo()" (click)="agregar()">
+  @if (familiar()) {
+    <div class="resumen-pack">
+      @if (precio(); as total) {
+        <div class="fila">
+          <span>Total del pack</span>
+          <strong class="precio">{{ total | clp }}</strong>
+        </div>
+        <div class="fila suave">
+          <span>Sale a {{ porLitro() | clp }} el litro</span>
+          <span class="ahorro">Ahorras {{ ahorro() | clp }}</span>
+        </div>
+        @if (bajaPorLitro()) {
+          <p class="tip">
+            <app-icono nombre="estrella" [tamano]="14" /> Agrega 1 litro más y cada litro baja
+            {{ bajaPorLitro() | clp }}
+          </p>
+        }
+      } @else {
+        <p class="tip">
+          Elige al menos {{ minimo() }} litros para ver el precio del pack
+        </p>
+      }
+    </div>
+  }
+
+  <button class="btn btn-lima agregar" [disabled]="!listo()" (click)="agregar()">
     <app-icono nombre="carrito" />
-    @if (completo()) {
+    @if (listo()) {
       Agregar al carrito
     } @else {
       {{
-        promo().litros - elegidos() === 1
-          ? 'Te falta 1'
-          : 'Te faltan ' + (promo().litros - elegidos())
+        minimo() - elegidos() === 1 ? 'Te falta 1' : 'Te faltan ' + (minimo() - elegidos())
       }}
     }
   </button>

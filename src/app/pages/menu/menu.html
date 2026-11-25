@@ -74,10 +74,19 @@
 
         <div class="info">
           <h3>{{ promo.nombre }}</h3>
-          <p>{{ promo.litros }} litros por {{ promo.precio | clp }}. {{ promo.descripcion }}</p>
+          @if (promo.variante === 'familiar') {
+            <p>{{ promo.descripcion }}. Mientras más litros, más barato cada uno.</p>
+          } @else {
+            <p>{{ promo.litros }} litros por {{ promo.precio | clp }}. {{ promo.descripcion }}</p>
+          }
 
           <div class="pie">
-            <span class="precio">{{ promo.precio | clp }}</span>
+            <span class="precio">
+              @if (promo.variante === 'familiar') {
+                <small class="desde">desde</small>
+              }
+              {{ promo.precio | clp }}
+            </span>
             <button class="btn btn-rosado" (click)="elegirPromo(promo)">
               {{ promo.variante === 'clasico' ? 'Agregar' : 'Elegir sabores' }}
             </button>
@@ -92,7 +101,7 @@
   <app-selector-sabores
     [promo]="promo"
     (cerrar)="promoAbierta.set(null)"
-    (confirmar)="agregarPromo(promo, $event)"
+    (confirmar)="agregarPromo($event)"
   />
 }
 

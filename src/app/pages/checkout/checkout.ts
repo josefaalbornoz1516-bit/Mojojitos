@@ -7,7 +7,7 @@ import { WhatsappService } from '../../services/whatsapp.service';
 import { GeocodificacionService } from '../../services/geocodificacion.service';
 import { ClpPipe } from '../../pipes/clp.pipe';
 import { NEGOCIO } from '../../config/negocio';
-import { COMUNAS, ORIGEN, buscarPuntoDespacho } from '../../config/cobertura';
+import { COMUNAS, ORIGEN, buscarZonaDespacho } from '../../config/cobertura';
 import { Coordenadas, DatosEntrega, Despacho } from '../../models/producto';
 import { Icono, NombreIcono } from '../../components/icono/icono';
 import { MapaDespacho } from '../../components/mapa-despacho/mapa-despacho';
@@ -80,7 +80,7 @@ export class Checkout {
 
   protected readonly puntoDespacho = computed(() => {
     const ubicacion = this.ubicacion();
-    return ubicacion ? buscarPuntoDespacho(ubicacion) : null;
+    return ubicacion ? buscarZonaDespacho(ubicacion) : null;
   });
 
   protected readonly despacho = computed<Despacho | null>(() => {
@@ -113,7 +113,7 @@ export class Checkout {
   /** Horarios que se pueden elegir para el día seleccionado */
   protected readonly horasDisponibles = computed(() => {
     const fecha = this.fechaElegida();
-    if (!fecha) return [];
+    if (!this.fechaValida(fecha)) return [];
 
     const [anio, mes, dia] = fecha.split('-').map(Number);
     if (this.reservas.diasCerrado.includes(new Date(anio, mes - 1, dia).getDay())) return [];
@@ -138,11 +138,21 @@ export class Checkout {
   /** Mensaje de error del pedido programado ('' si está todo bien) */
   protected readonly errorProgramado = computed(() => {
     if (this.tipoEntrega() !== 'programado') return '';
-    if (!this.fechaElegida()) return 'Elige el día de entrega';
+    const fecha = this.fechaElegida();
+    if (!fecha) return 'Elige el día de entrega';
+    if (fecha < aFechaLocal(new Date())) return 'Esa fecha ya pasó, elige otro día';
+    if (fecha > this.fechaMaxima) {
+      return `Solo puedes programar hasta ${this.reservas.diasMaximos} días adelante`;
+    }
     if (this.horasDisponibles().length === 0) return 'No quedan horarios ese día, elige otro';
     if (!this.horasDisponibles().includes(this.horaElegida())) return 'Elige la hora de entrega';
     return '';
   });
+
+  /** La fecha está entre hoy y el máximo permitido (formato yyyy-mm-dd, se compara como texto) */
+  private fechaValida(fecha: string): boolean {
+    return !!fecha && fecha >= aFechaLocal(new Date()) && fecha <= this.fechaMaxima;
+  }
 
   invalido(campo: keyof DatosEntrega): boolean {
     const control = this.form.controls[campo];
@@ -154,7 +164,7 @@ export class Checkout {
     this.mensajeUbicacion.set('');
 
     // Si el punto cae en otra comuna, la actualizamos
-    const punto = buscarPuntoDespacho(coordenadas);
+    const punto = buscarZonaDespacho(coordenadas);
     if (punto && punto.comuna !== this.form.controls.comuna.value) {
       this.form.controls.comuna.setValue(punto.comuna, { emitEvent: false });
     }

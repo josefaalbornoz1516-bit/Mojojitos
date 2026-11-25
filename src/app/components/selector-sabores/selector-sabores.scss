@@ -110,3 +110,59 @@
 .agregar {
   width: 100%;
 }
+
+// --- Pack Familiar ---
+.progreso {
+  position: relative;
+}
+
+.marca-minimo {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--texto);
+}
+
+.resumen-pack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 16px 0 4px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--negro);
+  border: 1px solid var(--gris-claro);
+
+  .fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+
+    &.suave {
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+  }
+
+  .precio {
+    color: var(--lima);
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .ahorro {
+    color: var(--rosado);
+    font-weight: 600;
+  }
+
+  .tip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--naranjo);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+}

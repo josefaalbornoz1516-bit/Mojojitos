@@ -1,5 +1,31 @@
 import { Producto } from '../models/producto';
 
+/**
+ * PACK FAMILIAR: de 6 a 10 litros, el cliente elige los sabores.
+ * Precio por litro según el tamaño del pack: mientras más litros, más barato cada uno.
+ * El Clásico sale más barato que los sabores frutales, igual que en la carta.
+ * Para cambiar precios, edita solo esta tabla.
+ */
+export const PACK_FAMILIAR = {
+  minimo: 6,
+  maximo: 10,
+  precioPorLitro: {
+    6: { clasico: 4790, sabor: 5990 },
+    7: { clasico: 4690, sabor: 5890 },
+    8: { clasico: 4590, sabor: 5790 },
+    9: { clasico: 4490, sabor: 5690 },
+    10: { clasico: 4390, sabor: 5590 },
+  } as Record<number, { clasico: number; sabor: number }>,
+};
+
+/** Precio del Pack Familiar (termina en 90), o null si la cantidad está fuera de 6 a 10 */
+export function precioPackFamiliar(clasicos: number, sabores: number): number | null {
+  const tarifa = PACK_FAMILIAR.precioPorLitro[clasicos + sabores];
+  if (!tarifa) return null;
+  const total = clasicos * tarifa.clasico + sabores * tarifa.sabor;
+  return Math.ceil(total / 100) * 100 - 10;
+}
+
 export const SABORES: Producto[] = [
   {
     id: 'clasico',
@@ -101,5 +127,18 @@ export const PROMOCIONES: Producto[] = [
     litros: 4,
     etiqueta: '4 litros',
     variante: 'sabores',
+  },
+  {
+    id: 'pack-familiar',
+    nombre: 'Pack Familiar',
+    descripcion: 'Arma tu pack de 6 a 10 litros con los sabores que quieras',
+    // Precio "desde": 6 litros de Clásico
+    precio: precioPackFamiliar(PACK_FAMILIAR.minimo, 0)!,
+    imagen: 'productos/pack-la-junta.webp',
+    color: '#b7e84b',
+    tipo: 'promo',
+    litros: PACK_FAMILIAR.maximo,
+    etiqueta: '6 a 10 litros',
+    variante: 'familiar',
   },
 ];

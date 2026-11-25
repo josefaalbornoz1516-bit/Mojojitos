@@ -10,13 +10,14 @@ import {
 } from '@angular/core';
 import * as L from 'leaflet';
 import { Coordenadas } from '../../models/producto';
-import { ORIGEN, PUNTOS_DESPACHO } from '../../config/cobertura';
+import { ORIGEN, ZONAS_DESPACHO } from '../../config/cobertura';
 
 const COLORES_PRECIO: Record<number, string> = {
   1500: '#b7e84b',
   2000: '#ffc93c',
   2500: '#ff8b45',
   3000: '#ff6b9a',
+  3500: '#e0304e',
 };
 
 const PIN_CLIENTE = `
@@ -89,16 +90,17 @@ export class MapaDespacho implements OnDestroy {
     }).addTo(this.mapa);
 
     // Zonas de cobertura
-    for (const punto of PUNTOS_DESPACHO) {
-      const color = COLORES_PRECIO[punto.precio] ?? '#a8a8a8';
-      L.circle([punto.ubicacion.lat, punto.ubicacion.lng], {
-        radius: punto.radio,
-        color,
-        weight: 1,
-        fillColor: color,
-        fillOpacity: 0.12,
-        interactive: false,
-      }).addTo(this.mapa);
+    for (const zona of ZONAS_DESPACHO) {
+      const color = COLORES_PRECIO[zona.precio] ?? '#a8a8a8';
+      for (const poligono of zona.poligonos) {
+        L.polygon(poligono, {
+          color,
+          weight: 1.5,
+          fillColor: color,
+          fillOpacity: 0.15,
+          interactive: false,
+        }).addTo(this.mapa);
+      }
     }
 
     // Punto de salida
